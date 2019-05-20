@@ -30,7 +30,7 @@ time, mark, audio, video {
 
 /* make sure to set some focus styles for accessibility */
 :focus {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--black);
 }
 
 /* HTML5 display-role reset for older browsers */
@@ -96,7 +96,7 @@ html {
  */
 
 a:focus {
-    outline: thin dotted;
+    outline: 2px solid var(--black);
 }
 
 /**
@@ -105,7 +105,7 @@ a:focus {
 
 a:active,
 a:hover {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--black);
 }
 
 /**

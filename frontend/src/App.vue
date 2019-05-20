@@ -33,6 +33,30 @@
             <p
               v-if="title.pages"
             >{{formatNumber(title.pages._text)}} page{{title.pages._text === '1' ? '' : 's'}}</p>
+            <div class="actions">
+              <button
+                type="button"
+                class="button"
+                @click="details(title, index)"
+                :ref="'details' + index"
+              >Details</button>
+              <button
+                type="button"
+                @click.stop="bookmark(title)"
+                class="bookmark"
+                :class="{'marked' : isBookmarked(title)}"
+                :aria-label="bookmarkLabel(title)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="100%" viewBox="0 0 26 37">
+                  <desc>Bookmark</desc>
+                  <path
+                    class="background"
+                    fill-rule="evenodd"
+                    stroke="#000"
+                    d="M4.3915094.5C2.2937264.5.5 2.024434.5 4.0023585V34.356132c0 .447783.10117924 1.019575.54740566 1.447123.44570755.427547.98688674.498632 1.39834904.498632.2308962-.0042.4540095-.07524.644434-.20651l9.8626413-6.579245 9.862642 6.579245c.190424.131274.413537.202359.644434.20651.411462 0 .952641-.07109 1.398349-.498632.446226-.427548.547405-.99934.547405-1.447123V4.0023585C25.40566 2.024434 23.611934.5 21.514151.5z"/>
+                </svg>
+              </button>
+            </div>
           </li>
         </ul>
         <p v-else-if="empty">0 results</p>
@@ -165,6 +189,25 @@ export default {
       this.preview = {
         titlesubtitleauthisbn: {}
       }
+    },
+    bookmark (title) {
+      if (this.isBookmarked(title)) {
+        this.bookmarks = this.bookmarks.filter(
+          bookmark => title.isbn._text !== bookmark
+        )
+      } else {
+        this.bookmarks.push(title.isbn._text)
+      }
+    },
+    bookmarkLabel (title) {
+      if (this.isBookmarked(title)) {
+        return 'remove bookmark'
+      } else {
+        return 'bookmark'
+      }
+    },
+    isBookmarked (title) {
+      return this.bookmarks.includes(title.isbn._text)
     }
   }
 }
@@ -228,6 +271,24 @@ form {
 }
 .button.wide {
   width: 100%;
+}
+.bookmark {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  height: 4rem;
+  width: 4rem;
+  margin-left: 1rem;
+  border: none;
+  background-color: var(--white);
+}
+
+.bookmark .background {
+  fill: var(--white);
+}
+
+.bookmark.marked .background {
+  fill: var(--blue);
 }
 
 .results {
