@@ -116,6 +116,9 @@ export default {
     },
     bookmarks: []
   }),
+  created () {
+    this.fetchBookmarks()
+  },
   methods: {
     search (start = 0, max = 50) {
       this.errored = false
@@ -190,13 +193,59 @@ export default {
         titlesubtitleauthisbn: {}
       }
     },
+    fetchBookmarks () {
+      fetch('http://localhost:3000', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => response.json())
+        .then(response => {
+          this.bookmarks = response.map(bookmark => bookmark.isbn)
+        })
+        .catch(reason => {
+          window.alert('Failed to fetch bookmarks. Check the console for error output.')
+          console.log('Failed to fetch bookmarks', { reason })
+        })
+    },
+    addBookmark (title) {
+      fetch('http://localhost:3000', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isbn: title.isbn._text })
+      })
+        .catch(reason => {
+          window.alert('Failed to bookmark. Check the console for error output.')
+          console.log('Failed to fetch bookmark', { reason })
+        })
+        .finally(() => this.fetchBookmarks())
+    },
+    removeBookmark (title) {
+      fetch('http://localhost:3000', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isbn: title.isbn._text })
+      })
+        .catch(reason => {
+          window.alert('Failed to bookmark. Check the console for error output.')
+          console.log('Failed to fetch bookmark', { reason })
+        })
+        .finally(() => this.fetchBookmarks())
+    },
     bookmark (title) {
+      // optimistic UI
       if (this.isBookmarked(title)) {
         this.bookmarks = this.bookmarks.filter(
           bookmark => title.isbn._text !== bookmark
         )
+        this.removeBookmark(title)
       } else {
         this.bookmarks.push(title.isbn._text)
+        this.addBookmark(title)
       }
     },
     bookmarkLabel (title) {
