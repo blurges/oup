@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <div class="container">
+      <h1>Oxford University Press Book Catalogue</h1>
       <form @submit.prevent="search()">
         <label for="search">Search book titles</label>
         <input
@@ -15,6 +16,7 @@
         >
         <button
           type="submit"
+          class="button wide"
           @keyup.enter="search()"
           :disabled="loading"
         >{{loading ? 'Loading' : 'Search' }}</button>
@@ -34,6 +36,21 @@
           </li>
         </ul>
         <p v-else-if="empty">0 results</p>
+      </div>
+    </div>
+    <div class="dialog-backdrop" :class="{'active' : modal}">
+      <div
+        role="dialog"
+        id="dialog"
+        aria-labelledby="dialog_label"
+        aria-modal="true"
+        class="dialog"
+        tabindex="0"
+        ref="modal"
+      >
+        <h2 id="dialog_label" v-if="preview.titleshort">{{preview.titleshort._text}}</h2>
+        <p v-if="preview.flapcopy" v-html="preview.flapcopy._text"></p>
+        <button @click.stop="close()" class="button">Close</button>
       </div>
     </div>
   </div>
@@ -68,7 +85,12 @@ export default {
     errored: false,
     loading: false,
     empty: false,
-    titles: []
+    titles: [],
+    modal: false,
+    preview: {
+      titlesubtitleauthisbn: {}
+    },
+    bookmarks: []
   }),
   methods: {
     search (start = 0, max = 50) {
@@ -126,6 +148,23 @@ export default {
       } catch (e) {
         return value
       }
+    },
+    details (title, index) {
+      this.preview = {
+        ...title,
+        index
+      }
+      this.modal = true
+      this.$nextTick(function () {
+        this.$refs.modal.focus()
+      })
+    },
+    close () {
+      this.$refs[`details${this.preview.index}`][0].focus()
+      this.modal = false
+      this.preview = {
+        titlesubtitleauthisbn: {}
+      }
     }
   }
 }
@@ -142,10 +181,12 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 
+h1 {
+  font-size: 150%;
+}
 .container {
   width: 100%;
   max-width: 50rem;
@@ -169,25 +210,64 @@ form {
 .input {
   width: 100%;
   padding: 1rem;
-  margin-right: 1rem;
-  margin-bottom: 1rem;
   border: none;
   background-color: var(--white);
   border: 1px solid var(--blue);
 }
-button {
-  width: 100%;
+.actions {
+  display: flex;
+  align-items: center;
+}
+.button {
+  margin-top: 1rem;
   padding: 1rem;
   border: none;
   background-color: var(--blue);
   color: var(--white);
   border-radius: var(--border-radius);
 }
+.button.wide {
+  width: 100%;
+}
+
 .results {
   margin-top: 3rem;
 }
 li {
+  margin-top: 1rem;
   padding: 1rem 0;
   text-align: left;
+}
+
+.details {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: none;
+  background-color: var(--blue);
+  color: var(--white);
+  border-radius: var(--border-radius);
+}
+.dialog-backdrop {
+  display: none;
+  position: fixed;
+  overflow-y: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.3);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.dialog-backdrop.active {
+  display: flex;
+}
+.dialog {
+  width: 100%;
+  max-width: 50rem;
+  margin: 2rem;
+  padding: 1rem;
+  background-color: var(--white);
 }
 </style>
